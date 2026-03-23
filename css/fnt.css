@@ -1,16 +1,17 @@
 /* Load custom font */
 @font-face {
-    font-family: "Rollerblade Pro";
-    src: url("ttf/rb.woff") format("woff"),
-         url("ttf/rb.woff2") format("woff2");
-    font-display: swap;
+	font-family: 'rb';
+	src: url("/woff2/rb.woff2") format('woff2'),
+		 url("/woff2/rb.woff") format('woff');
+	font-weight: normal;
+	font-style: normal;
 }
 
 /* Apply to whole site */
 body {
     margin: 0;
     color: white;
-    font-family: "Rollerblade Pro", Arial, sans-serif;
+    font-family: 'rb', sans-serif;
 }
 
 /* Optional content styling */
