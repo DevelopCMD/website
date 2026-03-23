@@ -1,7 +1,8 @@
 /* Load custom font */
 @font-face {
-    font-family: "RB";
-    src: url("ttf/rb.woff2") format("woff2");
+    font-family: "Rollerblade Pro";
+    src: url("ttf/rb.woff") format("woff"),
+         url("ttf/rb.woff2") format("woff2");
     font-display: swap;
 }
 
