@@ -1,0 +1,21 @@
+/* Load custom font */
+@font-face {
+    font-family: "RB";
+    src: url("ttf/rb.ttf") format("truetype");
+    font-display: swap;
+}
+
+/* Apply to whole site */
+body {
+    margin: 0;
+    color: white;
+    font-family: "Rollerblade Pro", Arial, sans-serif;
+}
+
+/* Optional content styling */
+.content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-top: 40vh;
+}
