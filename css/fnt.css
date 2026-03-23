@@ -1,7 +1,7 @@
 /* Load custom font */
 @font-face {
     font-family: "RB";
-    src: url("ttf/rb.ttf") format("truetype");
+    src: url("ttf/rb.woff2") format("woff2");
     font-display: swap;
 }
 
