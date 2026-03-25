@@ -16,7 +16,7 @@ Object.assign(container.style, {
 });
 document.body.appendChild(container);
 
-const images = ["img/bg/s1.png", "img/bg/s2.png"];
+const images = ["/img/bg/s1.png", "/img/bg/s2.png"];
 const squares = [];
 let isVisible = true;
 

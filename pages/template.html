@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Rollerblade Official Website</title>
+    <link rel="stylesheet" href="/css/fnt.css">
+    <link rel="stylesheet" href="/css/bg.css">
+	
+</head>
+<body>
+<script>
+fetch('/nav.html')
+    .then(res => res.text())
+    .then(html => {
+        document.body.insertAdjacentHTML('afterbegin', html);
+    });
+</script>
+<link rel="stylesheet" href="/css/nav.css">
+
+<div class="content">
+	<p>abcdef</p>
+</div>
+
+<script src="/bg.js"></script>
+</body>
+</html>

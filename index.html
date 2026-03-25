@@ -1,15 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="css/fnt.css">
-    <link rel="stylesheet" href="css/bg.css">
+	<meta charset="UTF-8">
+	<title>Rollerblade Official Website</title>
+    <link rel="stylesheet" href="/css/fnt.css">
+    <link rel="stylesheet" href="/css/bg.css">
+	
 </head>
 <body>
+<script>
+fetch('/nav.html')
+    .then(res => res.text())
+    .then(html => {
+        document.body.insertAdjacentHTML('afterbegin', html);
+    });
+</script>
+<link rel="stylesheet" href="/css/nav.css">
+
 <div class="content">
-    <h1>Welcome to roller647.win</h1>
+	<img src="/img/page_m/markblk.png" alt="Rollerblade Logo" height="100">
+    <h1>Welcome to my website!</h1>
     <p>Content coming soon, please be patient</p>
+	<div class="series-gallery">
+        <h2>My Socials</h2>
+        <a href="https://discord.gg/J8sS7fDHEr"><img src="ihate.png" alt="Discord Server"></a>
+        <a href="https://www.youtube.com/@RollerbladeOfficial"><img src="itet.png" alt="YouTube"></a>
+        <a href="https://twitch.tv/rollerblade647"><img src="chevy.png" alt="Twitch"></a>
+        <a href="https://bsky.app/profile/rollerblade647.bsky.social"><img src="posyt.png" alt="BlueSky"></a>
+    </div>
+	<p>© 2021-2026 TRP Media</p>
 </div>
 
-<script src="bg.js"></script>
+<script src="/bg.js"></script>
 </body>
 </html>

@@ -1,0 +1,50 @@
+/* Navbar container */
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 2; /* above everything */
+    font-family: "rb", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px; /* space from top of page to text */
+    padding-bottom: 20px;
+}
+
+/* Links container (centered horizontally) */
+.nav-links-container {
+    display: flex;
+    justify-content: center;
+    gap: 100px;
+    font-size: 26px; /* bigger text */
+}
+
+/* Individual link styling */
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: #82aef9;
+}
+
+/* Full-width line below links */
+.navbar-line {
+    width: 100%;         /* stretch full page */
+    height: 2.5px;
+    background-color: white;
+    margin-top: 20px;    /* space between text and line */
+    opacity: 1.0;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-top: 140px; /* leave space for navbar + line */
+}
