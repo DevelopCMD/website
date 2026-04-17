@@ -5,7 +5,7 @@
     left: 0;
     width: 100%;
     z-index: 2; /* above everything */
-    font-family: "rb", sans-serif;
+    font-family: "Noto", sans-serif;
     display: flex;
     background-color: rgba(0, 90, 244, 0.5);
     flex-direction: column;
