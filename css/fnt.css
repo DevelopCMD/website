@@ -151,6 +151,30 @@ a, button { -webkit-tap-highlight-color: transparent; }
     min-height: 350px;
 }
 
+.projects {
+    width: 100%;
+}
+
+.project-banner {
+    display: block;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+    border-radius: 18px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.project-banner img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.project-banner:hover {
+    transform: scale(1.02);
+}
+
 @media (max-width: 600px) {
     .content { width: calc(100% - 24px); padding-top: 125px; }
     .home { min-height: calc(100vh - 185px); padding-top: 20px; }
