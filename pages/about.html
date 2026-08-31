@@ -4,20 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About — Rollerblade Official Website</title>
-    <link rel="stylesheet" href="/css/fnt.css">
-    <link rel="stylesheet" href="/css/bg.css">
-    <link rel="stylesheet" href="/css/nav.css">
-    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <link rel="stylesheet" href="../css/fnt.css">
+    <link rel="stylesheet" href="../css/bg.css">
+    <link rel="stylesheet" href="../css/nav.css">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
 </head>
 <body>
-    <header class="site-header"><nav class="nav" id="site-nav" aria-label="Main navigation"></nav></header>
-    <main class="content">
+    <header class="site-header">
+        <div id="nav-container" data-nav-path="../nav.html">
+            <noscript>JavaScript is required to load the navigation.</noscript>
+        </div>
+    </header>
+
+<main class="content">
         <section class="page-shell">
             <header class="page-heading"><h1>About</h1></header>
             <div class="page-content-placeholder"></div>
         </section>
     </main>
-    <script src="/app.js"></script>
-    <script src="/bg.js"></script>
+
+    <script src="../nav.js"></script>
+    <script src="../bg.js"></script>
 </body>
 </html>
