@@ -1,51 +1,81 @@
-/* Navbar container */
 .nav {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 2; /* above everything */
+    z-index: 2;
+    box-sizing: border-box;
     font-family: "Noto", sans-serif;
     display: flex;
-    background-color: rgba(0, 90, 244, 0.5);
     flex-direction: column;
     align-items: center;
-    padding-top: 20px; /* space from top of page to text */
-    padding-bottom: 20px;
+    padding: 20px 20px 0;
+    background: linear-gradient(to bottom, rgba(0, 90, 244, 0.72), rgba(0, 90, 244, 0.45));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
-/* Links container (centered horizontally) */
 .nav-links-container {
     display: flex;
     justify-content: center;
-    gap: 100px;
-    font-size: 26px; /* bigger text */
+    align-items: center;
+    gap: clamp(35px, 7vw, 100px);
+    font-size: 26px;
 }
 
-/* Individual link styling */
 .nav-link {
+    position: relative;
     color: white;
     text-decoration: none;
     font-weight: bold;
-    transition: color 0.2s;
+    padding: 4px 2px 8px;
+    opacity: 0.78;
+    transition: color 0.2s ease, opacity 0.2s ease;
 }
 
-.nav-link:hover {
-    color: #82aef9;
+.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    border-radius: 999px;
+    background: white;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.2s ease;
 }
 
-/* Full-width line below links */
+.nav-link:hover,
+.nav-link.active {
+    color: white;
+    opacity: 1;
+}
+
+.nav-link.active::after {
+    transform: scaleX(1);
+}
+
 .navbar-line {
-    width: 100%;         /* stretch full page */
+    width: calc(100% + 40px);
     height: 2.5px;
+    margin-top: 18px;
     background-color: white;
-    margin-top: 20px;    /* space between text and line */
-    opacity: 1.0;
+    opacity: 0.9;
 }
 
-.content {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    margin-top: 140px; /* leave space for navbar + line */
+@media (max-width: 600px) {
+    .nav {
+        padding-top: 16px;
+    }
+
+    .nav-links-container {
+        gap: 28px;
+        font-size: 21px;
+    }
+
+    .navbar-line {
+        margin-top: 14px;
+    }
 }

@@ -1,37 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Rollerblade Official Website</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rollerblade Official Website</title>
     <link rel="stylesheet" href="/css/fnt.css">
     <link rel="stylesheet" href="/css/bg.css">
+    <link rel="stylesheet" href="/css/nav.css">
     <link rel="icon" type="image/png" href="/img/favicon.png">
 </head>
 <body>
-<script>
-fetch('/nav.html')
-    .then(res => res.text())
-    .then(html => {
-        document.body.insertAdjacentHTML('afterbegin', html);
-    });
-</script>
-<link rel="stylesheet" href="/css/nav.css">
-<div class="content">
-	<img src="/img/page_m/markblk.png" alt="Rollerblade Logo" height="100">
-    <h1>Welcome to my website!</h1>
-    <p>This is the official website of Rollerblade, a person who loves programming,</p>
-	<p>making YouTube videos, and playing Geometry Dash.</p>
-	
-	<div class="series-gallery">
-        <h2>Check out my Socials!</h2>
-        <a href="https://discord.gg/pR6UwAdf27"><img src="/img/page_m/s_dis.png" alt="Discord Server" height="50"></a>
-        <a href="https://www.youtube.com/@Rollerblade647"><img src="/img/page_m/s_yt.png" alt="YouTube" height="50"></a>
-        <a href="https://twitch.tv/rollerblade647"><img src="/img/page_m/s_tw.png" alt="Twitch" height="50"></a>
-        <a href="https://bsky.app/profile/roller647.win"><img src="/img/page_m/s_bsk.png" alt="Bluesky" height="50"></a>
-    </div>
-	<p>© 2021-2026 TRP Media</p>
-</div>
+    <nav class="nav" aria-label="Main navigation">
+        <div class="nav-links-container">
+            <a href="/index.html" class="nav-link" data-page="home">Home</a>
+            <a href="/pages/projects.html" class="nav-link" data-page="projects">Projects</a>
+            <a href="/pages/about.html" class="nav-link" data-page="about">About</a>
+        </div>
+        <div class="navbar-line"></div>
+    </nav>
 
-<script src="/bg.js"></script>
+    <main id="page-content" class="content page-enter">
+        <section class="page-home">
+            <img class="site-logo" src="/img/page_m/markblk.png" alt="Rollerblade Logo" height="100">
+            <h1>Welcome to Rollerblade</h1>
+            <p>Hello there! Welcome to my official website.</p>
+            <p>Here you can find all of my stuff here, as well as stuff from my other</p>
+            <p>content from my other properties, too.</p>
+
+            <div class="series-gallery">
+                <h2>Check out my Socials!</h2>
+                <div class="social-links">
+                    <a href="https://discord.gg/pR6UwAdf27" aria-label="Discord Server"><img src="/img/page_m/s_dis.png" alt="Discord Server" height="50"></a>
+                    <a href="https://www.youtube.com/@Rollerblade647" aria-label="YouTube"><img src="/img/page_m/s_yt.png" alt="YouTube" height="50"></a>
+                    <a href="https://twitch.tv/rollerblade647" aria-label="Twitch"><img src="/img/page_m/s_tw.png" alt="Twitch" height="50"></a>
+                    <a href="https://bsky.app/profile/rollerblade647.bsky.social" aria-label="Bluesky"><img src="/img/page_m/s_bsk.png" alt="Bluesky" height="50"></a>
+                </div>
+            </div>
+
+            <p class="copyright">© 2021-2026 BS Media</p>
+        </section>
+    </main>
+
+    <script src="/app.js"></script>
+    <script src="/bg.js"></script>
 </body>
 </html>
