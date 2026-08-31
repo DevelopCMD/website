@@ -1,110 +1,213 @@
-const NAV_URL = '/nav.html';
-const DEFAULT_PAGE = '/pages/home.html';
-const HOME_PATHS = new Set(['/', '/index.html', '/pages/home.html']);
+/*
+ * Rollerblade website navigation
+ *
+ * CSP-safe: this file uses no dynamic code execution or inline handlers.
+ * or dynamically generated JavaScript.
+ *
+ * Page content stays in separate .html files. This script only fetches
+ * those documents and swaps their <main class="content"> contents.
+ */
 
-const pageContent = document.getElementById('page-content') || document.querySelector('.content');
-const siteNav = document.getElementById('site-nav') || document.querySelector('.nav');
+(() => {
+    'use strict';
 
-function normalizePath(path) {
-    if (!path || path === '/') return DEFAULT_PAGE;
-    return path.endsWith('/') ? `${path}index.html` : path;
-}
+    const DEFAULT_PAGE = '/pages/home.html';
+    const NAV_URL = '/nav.html';
 
-function isInternalPage(url) {
-    return url.origin === location.origin && (url.pathname.endsWith('.html') || url.pathname === '/');
-}
+    const pageContent = document.getElementById('page-content');
+    const siteNav = document.getElementById('site-nav');
 
-async function loadNavigation() {
-    if (!siteNav) return;
-    const response = await fetch(NAV_URL);
-    if (!response.ok) throw new Error(`Navigation failed: ${response.status}`);
-    siteNav.innerHTML = await response.text();
-    bindNavigation();
-}
+    if (!pageContent || !siteNav) {
+        console.error('[site] Required navigation elements are missing.');
+        return;
+    }
 
-function bindNavigation() {
-    siteNav?.querySelectorAll('a.nav-link').forEach(link => {
-        if (link.dataset.navigationBound) return;
-        link.dataset.navigationBound = 'true';
-        link.addEventListener('click', event => {
-            const url = new URL(link.href, location.href);
-            if (!isInternalPage(url)) return;
-            event.preventDefault();
-            navigate(url.pathname, true);
+    function normalizePath(pathname) {
+        const path = pathname || '/';
+
+        if (path === '/' || path === '/index.html') {
+            return DEFAULT_PAGE;
+        }
+
+        return path;
+    }
+
+    function isInternalPage(url) {
+        return (
+            url.origin === window.location.origin &&
+            (url.pathname === '/' || url.pathname.endsWith('.html'))
+        );
+    }
+
+    function getPagePath() {
+        return normalizePath(window.location.pathname);
+    }
+
+    async function getText(url) {
+        const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'same-origin',
+            cache: 'no-cache',
+            headers: {
+                'Accept': 'text/html'
+            }
         });
-    });
-}
 
-function extractPage(text) {
-    const doc = new DOMParser().parseFromString(text, 'text/html');
-    const content = doc.querySelector('main.content');
-    if (!content) throw new Error('No main.content found in requested HTML page.');
-    return { content: content.innerHTML, title: doc.title || 'Rollerblade Official Website' };
-}
+        if (!response.ok) {
+            throw new Error(`Request failed (${response.status}): ${url}`);
+        }
 
-async function fetchPage(path) {
-    const response = await fetch(path, { cache: 'no-cache' });
-    if (!response.ok) throw new Error(`Page failed: ${response.status}`);
-    return extractPage(await response.text());
-}
+        return response.text();
+    }
 
-function setActiveLink(path) {
-    const normalized = normalizePath(path);
-    const onHome = HOME_PATHS.has(path) || HOME_PATHS.has(normalized);
-    siteNav?.querySelectorAll('.nav-link').forEach(link => {
-        const linkPath = new URL(link.href, location.href).pathname;
-        const active = onHome ? HOME_PATHS.has(linkPath) : normalizePath(linkPath) === normalized;
-        link.classList.toggle('active', active);
-        active ? link.setAttribute('aria-current', 'page') : link.removeAttribute('aria-current');
-    });
-}
+    function extractPage(documentText) {
+        const parser = new DOMParser();
+        const document = parser.parseFromString(documentText, 'text/html');
+        const main = document.querySelector('main.content');
 
-function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        if (!main) {
+            throw new Error('The requested HTML file does not contain <main class="content">.');
+        }
 
-async function navigate(path, pushHistory = false) {
-    if (!pageContent) return;
-    const requested = path || location.pathname;
-    const normalized = normalizePath(requested);
-    const current = normalizePath(location.pathname);
-    const alreadyLoaded = current === normalized && pageContent.dataset.loaded === 'true';
+        return {
+            html: main.innerHTML,
+            title: document.title || 'Rollerblade Official Website'
+        };
+    }
 
-    try {
-        if (!alreadyLoaded) {
-            pageContent.classList.add('page-exit');
-            const page = await fetchPage(normalized);
-            await sleep(130);
-            pageContent.innerHTML = page.content;
+    async function loadNavigation() {
+        const html = await getText(NAV_URL);
+        siteNav.innerHTML = html;
+
+        siteNav.querySelectorAll('a.nav-link').forEach((link) => {
+            link.addEventListener('click', handleNavigationClick);
+        });
+    }
+
+    function handleNavigationClick(event) {
+        // Only intercept normal left-click navigation. Ctrl/Cmd-click,
+        // middle-click, Shift-click, etc. continue to behave normally.
+        if (
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+        ) {
+            return;
+        }
+
+        const link = event.currentTarget;
+        const url = new URL(link.href, window.location.href);
+
+        if (!isInternalPage(url)) {
+            return;
+        }
+
+        event.preventDefault();
+        navigate(url.pathname, true);
+    }
+
+    function updateActiveLink(pathname) {
+        const current = normalizePath(pathname);
+
+        siteNav.querySelectorAll('a.nav-link').forEach((link) => {
+            const linkPath = normalizePath(
+                new URL(link.href, window.location.href).pathname
+            );
+
+            const active = linkPath === current;
+
+            link.classList.toggle('active', active);
+
+            if (active) {
+                link.setAttribute('aria-current', 'page');
+            } else {
+                link.removeAttribute('aria-current');
+            }
+        });
+    }
+
+    function wait(milliseconds) {
+        return new Promise((resolve) => {
+            window.setTimeout(resolve, milliseconds);
+        });
+    }
+
+    async function navigate(pathname, addHistory) {
+        const requestedPath = normalizePath(pathname);
+        const currentPath = getPagePath();
+
+        if (requestedPath === currentPath && pageContent.dataset.loaded === 'true') {
+            updateActiveLink(requestedPath);
+            return;
+        }
+
+        pageContent.classList.remove('page-enter');
+        pageContent.classList.add('page-exit');
+
+        try {
+            const documentText = await getText(requestedPath);
+            const page = extractPage(documentText);
+
+            await wait(130);
+
+            pageContent.innerHTML = page.html;
             pageContent.dataset.loaded = 'true';
             document.title = page.title;
+
             pageContent.classList.remove('page-exit');
             pageContent.classList.add('page-enter');
-            requestAnimationFrame(() => requestAnimationFrame(() => pageContent.classList.remove('page-enter')));
-        }
-        if (pushHistory && normalized !== current) history.pushState({ path: normalized }, '', normalized);
-        setActiveLink(normalized);
-    } catch (error) {
-        console.error(error);
-        pageContent.classList.remove('page-exit', 'page-enter');
-        pageContent.innerHTML = '<section class="page-error"><h1>Something went wrong</h1><p>We could not load this page.</p></section>';
-    }
-}
 
-window.addEventListener('popstate', () => navigate(location.pathname));
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
+                    pageContent.classList.remove('page-enter');
+                });
+            });
 
-(async function initialize() {
-    if (!pageContent) return;
-    try {
-        await loadNavigation();
-        // The persistent index shell has an empty main, so load home.html.
-        // Standalone pages already have content and should not fetch themselves.
-        if (pageContent.children.length === 0) {
-            await navigate(location.pathname, false);
-        } else {
-            pageContent.dataset.loaded = 'true';
-            setActiveLink(location.pathname);
+            if (addHistory && requestedPath !== currentPath) {
+                window.history.pushState({ path: requestedPath }, '', requestedPath);
+            }
+
+            updateActiveLink(requestedPath);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+            console.error('[site] Could not load page:', error);
+
+            pageContent.classList.remove('page-exit', 'page-enter');
+            pageContent.innerHTML = `
+                <section class="page-error">
+                    <h1>Something went wrong</h1>
+                    <p>We could not load this page. Please try again.</p>
+                </section>
+            `;
         }
-    } catch (error) {
-        console.error(error);
-        pageContent.innerHTML = '<section class="page-error"><h1>Unable to load the website.</h1></section>';
     }
+
+    window.addEventListener('popstate', () => {
+        navigate(window.location.pathname, false);
+    });
+
+    async function initialize() {
+        try {
+            await loadNavigation();
+
+            // index.html deliberately contains an empty main. The actual
+            // homepage is pages/home.html, just like every other page.
+            await navigate(getPagePath(), false);
+        } catch (error) {
+            console.error('[site] Initialization failed:', error);
+
+            pageContent.classList.remove('page-exit', 'page-enter');
+            pageContent.innerHTML = `
+                <section class="page-error">
+                    <h1>Unable to load the website</h1>
+                    <p>Please refresh the page and try again.</p>
+                </section>
+            `;
+        }
+    }
+
+    initialize();
 })();
