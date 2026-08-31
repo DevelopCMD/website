@@ -1,78 +1,110 @@
-(() => {
-    const content = document.getElementById("page-content");
-    const links = document.querySelectorAll(".nav-link");
+const NAV_URL = '/nav.html';
+const DEFAULT_PAGE = '/pages/home.html';
+const HOME_PATHS = new Set(['/', '/index.html', '/pages/home.html']);
 
-    const pageNames = {
-        "/index.html": "home",
-        "/": "home",
-        "/pages/projects.html": "projects",
-        "/pages/about.html": "about"
-    };
+const pageContent = document.getElementById('page-content') || document.querySelector('.content');
+const siteNav = document.getElementById('site-nav') || document.querySelector('.nav');
 
-    function pageKey(url) {
-        const path = new URL(url, window.location.origin).pathname;
-        return pageNames[path] || null;
-    }
+function normalizePath(path) {
+    if (!path || path === '/') return DEFAULT_PAGE;
+    return path.endsWith('/') ? `${path}index.html` : path;
+}
 
-    function updateActiveLink(url = window.location.href) {
-        const active = pageKey(url);
-        links.forEach(link => {
-            const isActive = link.dataset.page === active;
-            link.classList.toggle("active", isActive);
-            if (isActive) link.setAttribute("aria-current", "page");
-            else link.removeAttribute("aria-current");
-        });
-    }
+function isInternalPage(url) {
+    return url.origin === location.origin && (url.pathname.endsWith('.html') || url.pathname === '/');
+}
 
-    function transitionTo(html) {
-        content.classList.remove("page-enter");
-        content.classList.add("page-exit");
+async function loadNavigation() {
+    if (!siteNav) return;
+    const response = await fetch(NAV_URL);
+    if (!response.ok) throw new Error(`Navigation failed: ${response.status}`);
+    siteNav.innerHTML = await response.text();
+    bindNavigation();
+}
 
-        window.setTimeout(() => {
-            content.innerHTML = html;
-            content.scrollTop = 0;
-            window.scrollTo({ top: 0, behavior: "instant" });
-            content.classList.remove("page-exit");
-            content.classList.add("page-enter");
-        }, 180);
-    }
-
-    async function navigate(url, pushState = true) {
-        if (url === window.location.href) return;
-
-        try {
-            const response = await fetch(url, { headers: { "X-Requested-With": "SPA" } });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const html = await response.text();
-            const documentParser = new DOMParser();
-            const nextDocument = documentParser.parseFromString(html, "text/html");
-            const nextContent = nextDocument.querySelector(".content");
-
-            if (!nextContent) throw new Error("The requested page has no .content element.");
-
-            transitionTo(nextContent.innerHTML);
-
-            if (pushState) history.pushState({}, "", url);
-            document.title = nextDocument.title || "Rollerblade Official Website";
-            updateActiveLink(url);
-        } catch (error) {
-            console.error("SPA navigation failed:", error);
-            window.location.href = url;
-        }
-    }
-
-    links.forEach(link => {
-        link.addEventListener("click", event => {
-            if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+function bindNavigation() {
+    siteNav?.querySelectorAll('a.nav-link').forEach(link => {
+        if (link.dataset.navigationBound) return;
+        link.dataset.navigationBound = 'true';
+        link.addEventListener('click', event => {
+            const url = new URL(link.href, location.href);
+            if (!isInternalPage(url)) return;
             event.preventDefault();
-            navigate(link.href);
+            navigate(url.pathname, true);
         });
     });
+}
 
-    window.addEventListener("popstate", () => {
-        navigate(window.location.href, false);
+function extractPage(text) {
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    const content = doc.querySelector('main.content');
+    if (!content) throw new Error('No main.content found in requested HTML page.');
+    return { content: content.innerHTML, title: doc.title || 'Rollerblade Official Website' };
+}
+
+async function fetchPage(path) {
+    const response = await fetch(path, { cache: 'no-cache' });
+    if (!response.ok) throw new Error(`Page failed: ${response.status}`);
+    return extractPage(await response.text());
+}
+
+function setActiveLink(path) {
+    const normalized = normalizePath(path);
+    const onHome = HOME_PATHS.has(path) || HOME_PATHS.has(normalized);
+    siteNav?.querySelectorAll('.nav-link').forEach(link => {
+        const linkPath = new URL(link.href, location.href).pathname;
+        const active = onHome ? HOME_PATHS.has(linkPath) : normalizePath(linkPath) === normalized;
+        link.classList.toggle('active', active);
+        active ? link.setAttribute('aria-current', 'page') : link.removeAttribute('aria-current');
     });
+}
 
-    updateActiveLink();
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+async function navigate(path, pushHistory = false) {
+    if (!pageContent) return;
+    const requested = path || location.pathname;
+    const normalized = normalizePath(requested);
+    const current = normalizePath(location.pathname);
+    const alreadyLoaded = current === normalized && pageContent.dataset.loaded === 'true';
+
+    try {
+        if (!alreadyLoaded) {
+            pageContent.classList.add('page-exit');
+            const page = await fetchPage(normalized);
+            await sleep(130);
+            pageContent.innerHTML = page.content;
+            pageContent.dataset.loaded = 'true';
+            document.title = page.title;
+            pageContent.classList.remove('page-exit');
+            pageContent.classList.add('page-enter');
+            requestAnimationFrame(() => requestAnimationFrame(() => pageContent.classList.remove('page-enter')));
+        }
+        if (pushHistory && normalized !== current) history.pushState({ path: normalized }, '', normalized);
+        setActiveLink(normalized);
+    } catch (error) {
+        console.error(error);
+        pageContent.classList.remove('page-exit', 'page-enter');
+        pageContent.innerHTML = '<section class="page-error"><h1>Something went wrong</h1><p>We could not load this page.</p></section>';
+    }
+}
+
+window.addEventListener('popstate', () => navigate(location.pathname));
+
+(async function initialize() {
+    if (!pageContent) return;
+    try {
+        await loadNavigation();
+        // The persistent index shell has an empty main, so load home.html.
+        // Standalone pages already have content and should not fetch themselves.
+        if (pageContent.children.length === 0) {
+            await navigate(location.pathname, false);
+        } else {
+            pageContent.dataset.loaded = 'true';
+            setActiveLink(location.pathname);
+        }
+    } catch (error) {
+        console.error(error);
+        pageContent.innerHTML = '<section class="page-error"><h1>Unable to load the website.</h1></section>';
+    }
 })();
